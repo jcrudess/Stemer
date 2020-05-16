@@ -3,10 +3,10 @@ from tkinter import filedialog
 import os
 import time
 import threading
-import spleeter
 
-INIT_STATUS = 'Spreman!'
+INIT_STATUS = "Spreman!"
 TITLE = "Stemer v.0.1.1"
+
 
 class Application(tk.Frame):
     folderPath = os.path.abspath(os.getcwd())
@@ -22,7 +22,7 @@ class Application(tk.Frame):
     def __init__(self):
         # windows
         self.window = tk.Tk()
-        self.window.iconbitmap('./resource/hammer.ico')
+        self.window.iconbitmap("./resource/hammer.ico")
         self.window.title(TITLE)
         self.window.size
         self.window.resizable(False, False)
@@ -30,7 +30,7 @@ class Application(tk.Frame):
         # label file
         self.fileLabelFrame = tk.Frame(self.window, height=10, width=100)
         self.fileLabelFrame.grid(row=1, column=1, pady=2)
-        self.fileOpis = tk.Label(self.fileLabelFrame, text= "File:", width=8, anchor='e')
+        self.fileOpis = tk.Label(self.fileLabelFrame, text="File:", width=8, anchor="e")
         self.fileOpis.grid(column=0, row=0)
         self.fileLabel = tk.Label(self.fileLabelFrame, text=self.filePath, width=58)
         self.fileLabel.grid(column=1, row=0)
@@ -41,7 +41,9 @@ class Application(tk.Frame):
         # label folder
         self.folderLabelFrame = tk.Frame(self.window, height=10, width=100)
         self.folderLabelFrame.grid(row=2, column=1, pady=2)
-        self.folderOpis = tk.Label(self.folderLabelFrame, text='Spremi u:', width=8, anchor='e')
+        self.folderOpis = tk.Label(
+            self.folderLabelFrame, text="Spremi u:", width=8, anchor="e"
+        )
         self.folderOpis.grid(column=0, row=0)
         self.folderLabel = tk.Label(
             self.folderLabelFrame, text=self.folderPath, width=58
@@ -58,7 +60,12 @@ class Application(tk.Frame):
         self.optionFrame = tk.Frame(self.window, height=10, width=100)
         self.optionFrame.grid(row=3, column=1, pady=2)
         self.choiceVar.set("2 stems - vokal + instrumenti")
-        self.options = tk.OptionMenu(self.optionFrame, self.choiceVar, *self.optionList, command=self.optionChange)
+        self.options = tk.OptionMenu(
+            self.optionFrame,
+            self.choiceVar,
+            *self.optionList,
+            command=self.optionChange
+        )
         self.options.config(width=71)
         self.options.grid(column=0, row=0)
         self.convButton = tk.Button(
@@ -85,20 +92,27 @@ class Application(tk.Frame):
         self.folderLabel.config(text=folderDialog)
 
     def separate(self):
-        t = threading.Thread(target=self.callSpleeter, args=(self.filePath, self.folderPath, self.option))
+        t = threading.Thread(
+            target=self.callSpleeter, args=(self.filePath, self.folderPath, self.option)
+        )
         t.start()
 
     def setStatus(self, text):
-        self.statusLabel.config(text = text)
+        self.statusLabel.config(text=text)
 
     def optionChange(self, arg):
         self.option = self.optionDict[arg]
-    
-    def callSpleeter(self, file, folder, mode):
-        self.setStatus('Radim...')
-        self.convButton.config(state='disabled')
-        time.sleep(10)
-        self.setStatus('Gotov!')
-        self.convButton.config(state='normal')
-        self.setStatus(INIT_STATUS)
 
+    def callSpleeter(self, file, folder, mode):
+        self.setStatus("Radim...")
+        self.convButton.config(state="disabled")
+        try:
+            from spleeter.separator import Separator
+
+            separator = Separator(mode)
+            separator.separate_to_file(file, folder)
+        except Exception as e:
+            print(e)
+        self.setStatus("Gotov!")
+        self.convButton.config(state="normal")
+        self.setStatus(INIT_STATUS)
